@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from 'src/types/user';
 
 @Injectable()
@@ -8,24 +8,35 @@ export class AuthService {
   signup(email: string, password: string) {
     const userExists = this.users.find((user) => user.email === email);
     if (userExists) {
-      return { error: 'User already exists' };
+      return new HttpException(
+        'User already exists',
+        HttpStatus.CONFLICT,
+      );
     }
 
     if (email == '' || password == '')
-      return { error: 'Password or email missing' };
+    return new HttpException(
+        'Password or email missing!',
+        HttpStatus.UNAUTHORIZED,
+      );
 
     this.users.push({ email, password });
-    return { message: 'User registered successfully' };
+    return 'User registered successfully!';
   }
 
   signin(email: string, password: string) {
     const user = this.users.find(
       (user) => user.email === email && user.password === password,
     );
+    
     if (user) {
-      return { user: user, message: 'Login successful' };
+      return { user: user, message: 'Login successful!' };
     }
-    return { error: 'Invalid email or password' };
+
+    return new HttpException(
+        'Invalid email or password!',
+        HttpStatus.UNAUTHORIZED,
+      );
   }
 
   getUsers(): User[] {
